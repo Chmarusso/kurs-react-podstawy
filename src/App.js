@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import './App.css'
+import ToDoItem from './components/ToDoItem'
 
 class ToDoList extends Component {
   state = {
@@ -24,7 +26,7 @@ class ToDoList extends Component {
     return (
       <div>
         <h1>{title}</h1>
-        {tasks.map(task => <div><p>{task}</p></div>)}
+        {tasks.map(task => <ToDoItem text={task.text} done={task.done} />)}
         <input type='text' onChange={this.updateDraft} value={draft} />
         <button onClick={this.addToDo}>Add</button>
       </div>
@@ -34,8 +36,8 @@ class ToDoList extends Component {
 
 class App extends Component {
   myTasks = [
-    'Record a ReactJS video',
-    'Go for a walk'
+    {text: 'Record a ReactJS video'},
+    {done: false, text: 'Go for a walk'}
   ]
 
   render() {
