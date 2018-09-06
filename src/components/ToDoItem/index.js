@@ -11,6 +11,7 @@ const Item = styled.div`
 `
 
 class ToDoItem extends Component {
+
   static defaultProps = {
     done: false
   }
@@ -21,6 +22,10 @@ class ToDoItem extends Component {
 
   toggleDone = () => {
     this.setState({done: !this.state.done})
+  }
+
+  componentWillUnmount = () => {
+    console.log(`todo ${this.props.text} unmounted...`)
   }
 
   render() {

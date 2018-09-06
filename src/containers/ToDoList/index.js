@@ -17,7 +17,29 @@ const Header = styled.h1`
   color: #fff;
 `
 
+const DestroyButton = styled.button`
+  border-radius: 10px;
+  background: red;
+  padding: 5px;
+  color: #fff;
+  margin-bottom: 10px;
+`
+
 class ToDoList extends Component {
+  constructor(props) {
+    super(props)
+    console.log('Hello from constructor')
+  }
+
+  componentDidMount = () => {
+    console.log('component mounted!')
+  }
+
+  componentDidUpdate = () => {
+    console.log('component (ToDoList) updated')
+  }
+
+
   static defaultProps = {
     tasks: [
       {text: 'Record a ReactJS video'},
@@ -42,6 +64,10 @@ class ToDoList extends Component {
     this.setState({tasks: list, draft: ''})
   }
 
+  removeAll = () => {
+    this.setState({tasks: []})
+  }
+
   render() {
     const { title } = this.props
     const { tasks, draft } = this.state
@@ -49,6 +75,7 @@ class ToDoList extends Component {
     return (
       <Container>
         <Header>{title}</Header>
+        <DestroyButton onClick={this.removeAll}>Remove all</DestroyButton>
         {tasks.map(task => <ToDoItem text={task.text} done={task.done} />)}
         <NewTodoForm
           onSubmit={this.addToDo}
