@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import ToDoItem from '../../components/ToDoItem'
 import NewTodoForm from '../../components/NewTodoForm'
 import styled from 'styled-components'
+import * as toDoItemApi from '../../helpers/toDoItemApi'
+import * as _ from 'ramda'
 
 const Container = styled.div`
   background: #2b2e39;
@@ -26,25 +28,13 @@ const DestroyButton = styled.button`
 `
 
 class ToDoList extends Component {
-  constructor(props) {
-    super(props)
-    console.log('Hello from constructor')
+  componentDidMount = async () => {
+    const tasks = await toDoItemApi.getAll()
+    this.setState({tasks})
   }
-
-  componentDidMount = () => {
-    console.log('component mounted!')
-  }
-
-  componentDidUpdate = () => {
-    console.log('component (ToDoList) updated')
-  }
-
 
   static defaultProps = {
-    tasks: [
-      {text: 'Record a ReactJS video'},
-      {done: false, text: 'Go for a walk'}
-    ],
+    tasks: [],
     title: 'My stuff'
   }
 
@@ -57,11 +47,34 @@ class ToDoList extends Component {
     this.setState({draft: event.target.value})
   }
 
-  addToDo = () => {
+  addToDo = async () => {
     const { tasks, draft } = this.state
-    const list = tasks
-    list.push({text: draft, done: false})
-    this.setState({tasks: list, draft: ''})
+    const task = await toDoItemApi.create({content: draft})
+
+    this.setState({tasks: _.append(task, tasks), draft: ''})
+  }
+
+  findById = (id, arr) => {
+    const index = _.findIndex(_.propEq('id', id))(arr)
+    return { index: index, task: arr[index] }
+  }
+
+  destroyToDo = async (id) => {
+    const { tasks } = this.state
+    const response = await toDoItemApi.destroy(id)
+
+    const { index } = this.findById(id, tasks)
+
+    this.setState({tasks: _.remove(index, 1, tasks)})
+
+  }
+
+  toggleDone = async (id) => {
+    const { tasks } = this.state
+    const { index, task } = this.findById(id, tasks)
+    const response = await toDoItemApi.update(id, {done: !task.done})
+
+    this.setState({tasks: _.update(index, response, tasks)})
   }
 
   removeAll = () => {
@@ -76,7 +89,16 @@ class ToDoList extends Component {
       <Container>
         <Header>{title}</Header>
         <DestroyButton onClick={this.removeAll}>Remove all</DestroyButton>
-        {tasks.map(task => <ToDoItem text={task.text} done={task.done} />)}
+        {tasks.map(task =>
+          <ToDoItem
+            id={task.id}
+            key={task.key}
+            text={task.content}
+            done={task.done}
+            destroy={this.destroyToDo}
+            toggleDone={this.toggleDone}
+          />
+        )}
         <NewTodoForm
           onSubmit={this.addToDo}
           onChange={this.updateDraft}
