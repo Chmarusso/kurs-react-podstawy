@@ -5,16 +5,6 @@ import styled from 'styled-components'
 import * as toDoItemApi from '../../helpers/toDoItemApi'
 import * as _ from 'ramda'
 
-const Container = styled.div`
-  background: #2b2e39;
-  margin: 0 auto;
-  width: 80%;
-  max-width: 600px;
-  padding: 14px;
-  border-radius: 14px;
-  margin-top: 14px;
-`
-
 const Header = styled.h1`
   color: #fff;
 `
@@ -61,7 +51,7 @@ class ToDoList extends Component {
 
   destroyToDo = async (id) => {
     const { tasks } = this.state
-    const response = await toDoItemApi.destroy(id)
+    await toDoItemApi.destroy(id)
 
     const { index } = this.findById(id, tasks)
 
@@ -86,7 +76,7 @@ class ToDoList extends Component {
     const { tasks, draft } = this.state
 
     return (
-      <Container>
+      <div>
         <Header>{title}</Header>
         <DestroyButton onClick={this.removeAll}>Remove all</DestroyButton>
         {tasks.map(task =>
@@ -103,7 +93,7 @@ class ToDoList extends Component {
           onSubmit={this.addToDo}
           onChange={this.updateDraft}
           draft={draft} />
-      </Container>
+      </div>
     )
   }
 }
