@@ -9,14 +9,6 @@ const Header = styled.h1`
   color: #fff;
 `
 
-const DestroyButton = styled.button`
-  border-radius: 10px;
-  background: red;
-  padding: 5px;
-  color: #fff;
-  margin-bottom: 10px;
-`
-
 class ToDoList extends Component {
   componentDidMount = async () => {
     const tasks = await toDoItemApi.getAll()
@@ -78,7 +70,6 @@ class ToDoList extends Component {
     return (
       <div>
         <Header>{title}</Header>
-        <DestroyButton onClick={this.removeAll}>Remove all</DestroyButton>
         {tasks.map(task =>
           <ToDoItem
             id={task.id}
