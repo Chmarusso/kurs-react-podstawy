@@ -1,5 +1,9 @@
 import styled from 'styled-components'
 
+export const ErrorMsg = styled.div`
+  color: red;
+`
+
 export const SubmitButton = styled.button`
   display: block;
   border-radius: 10px;
