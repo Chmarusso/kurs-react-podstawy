@@ -1,10 +1,20 @@
 import React, { Component } from 'react'
-import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom'
+import {
+  BrowserRouter as Router,
+  Route,
+  Switch,
+  Redirect
+} from 'react-router-dom'
 import styled from 'styled-components'
 import ToDoList from './containers/ToDoList'
 import ToDoEditForm from './containers/ToDoEditForm'
 import NotFound from './components/NotFound'
 import Login from './containers/Login'
+import Navbar from './containers/Navbar'
+import {
+  CurrentUserProvider,
+  CurrentUserConsumer
+} from './context/CurrentUser.context'
 import './App.css'
 
 
@@ -22,16 +32,20 @@ const PrivateRoute = ({ component: Component, ...rest }) => (
   <Route
     {...rest}
     render={props =>
-      sessionStorage.getItem('currentUser') ? (
-        <Component {...props} />
-      ) : (
-        <Redirect
-          to={{
-            pathname: "/login",
-            state: { from: props.location }
-          }}
-        />
-      )
+      <CurrentUserConsumer>
+        {({ user }) => (
+          user ? (
+            <Component {...props} />
+          ) : (
+            <Redirect
+              to={{
+                pathname: "/login",
+                state: { from: props.location }
+              }}
+            />
+          )
+        )}
+      </CurrentUserConsumer>
     }
   />
 )
@@ -40,14 +54,17 @@ class App extends Component {
   render() {
     return (
       <Router>
-        <Container>
-          <Switch>
-            <Route exact path='/' component={ToDoList}/>
-            <PrivateRoute exact path={'/todo_items/:itemId'} component={ToDoEditForm}/>
-            <Route exact path='/login' component={Login} />
-            <Route component={NotFound} />
-          </Switch>
-        </Container>
+        <CurrentUserProvider>
+          <Container>
+            <Navbar/>
+            <Switch>
+              <Route exact path='/' component={ToDoList}/>
+              <PrivateRoute exact path={'/todo_items/:itemId'} component={ToDoEditForm}/>
+              <Route exact path='/login' component={Login} />
+              <Route component={NotFound} />
+            </Switch>
+          </Container>
+        </CurrentUserProvider>
       </Router>
     );
   }

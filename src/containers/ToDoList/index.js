@@ -73,7 +73,7 @@ class ToDoList extends Component {
         {tasks.map(task =>
           <ToDoItem
             id={task.id}
-            key={task.key}
+            key={task.id}
             text={task.content}
             done={task.done}
             destroy={this.destroyToDo}
