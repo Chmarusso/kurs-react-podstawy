@@ -34,11 +34,12 @@ class ToDoList extends Component {
     const task = await toDoItemApi.create({content: draft})
 
     this.setState({tasks: _.append(task, tasks), draft: ''})
+
   }
 
   findById = (id, arr) => {
     const index = _.findIndex(_.propEq('id', id))(arr)
-    return { index: index, task: arr[index] }
+    return { index, task: arr[index] }
   }
 
   destroyToDo = async (id) => {
