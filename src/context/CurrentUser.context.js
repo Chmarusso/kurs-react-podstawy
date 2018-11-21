@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 
-const CurrentUserContext = React.createContext()
+export const CurrentUserContext = React.createContext()
 
 export class CurrentUserProvider extends Component {
   state = {
