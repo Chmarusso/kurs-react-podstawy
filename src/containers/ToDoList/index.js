@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, useReducer, useState, useEffect } from 'react'
 import ToDoItem from '../../components/ToDoItem'
 import NewTodoForm from '../../components/NewTodoForm'
 import styled from 'styled-components'
@@ -9,85 +9,96 @@ const Header = styled.h1`
   color: #fff;
 `
 
-class ToDoList extends Component {
-  componentDidMount = async () => {
-    const tasks = await toDoItemApi.getAll()
-    this.setState({tasks})
+const initialState = {
+  todos: {},
+  todoIds: []
+}
+
+const reducer = (state, action) => {
+  switch(action.type) {
+    case 'ADD_TODO':
+      return {
+        ...state,
+        todos: {
+          ...state.todos,
+          [action.todo.id]: action.todo
+        },
+        todoIds: [...state.todoIds, action.todo.id]
+      }
+    case 'TOGGLE_TODO':
+      return {
+        ...state,
+        todos: {
+          ...state.todos,
+          [action.id]: {
+            ...state.todos[action.id],
+            done: !state.todos[action.id].done
+          }
+        }
+      }
+
+    case 'REMOVE_TODO':
+      return {
+        ...state,
+        todos: {
+          ...state.todos,
+          [action.id]: undefined,
+        },
+        todoIds: state.todoIds.filter(id => id !== action.id)
+      }
+    default:
+      return state
+  }
+}
+
+const ToDoList = () => {
+  const [draft, setDraft] = useState('')
+  const [store, dispatch] = useReducer(reducer, initialState)
+
+  useEffect(async () => {
+    const todos = await toDoItemApi.getAll()
+    todos.map(todo => {
+      dispatch({type: 'ADD_TODO', todo})
+    })
+  }, [])
+
+  const toggleDone = async (id) => {
+    const task = store.todos[id]
+    await toDoItemApi.update(id, {done: !task.done})
+    dispatch({type: 'TOGGLE_TODO', id})
   }
 
-  static defaultProps = {
-    tasks: [],
-    title: 'My stuff'
+  const addToDo = async () => {
+    const todo = await toDoItemApi.create({content: draft})
+    dispatch({type: 'ADD_TODO', todo})
   }
 
-  state = {
-    tasks: this.props.tasks,
-    draft: ''
-  }
-
-  updateDraft = event => {
-    this.setState({draft: event.target.value})
-  }
-
-  addToDo = async () => {
-    const { tasks, draft } = this.state
-    const task = await toDoItemApi.create({content: draft})
-
-    this.setState({tasks: _.append(task, tasks), draft: ''})
-
-  }
-
-  findById = (id, arr) => {
-    const index = _.findIndex(_.propEq('id', id))(arr)
-    return { index, task: arr[index] }
-  }
-
-  destroyToDo = async (id) => {
-    const { tasks } = this.state
+  const destroyToDo = async (id) => {
     await toDoItemApi.destroy(id)
-
-    const { index } = this.findById(id, tasks)
-
-    this.setState({tasks: _.remove(index, 1, tasks)})
-
+    dispatch({type: 'REMOVE_TODO', id})
   }
 
-  toggleDone = async (id) => {
-    const { tasks } = this.state
-    const { index, task } = this.findById(id, tasks)
-    const response = await toDoItemApi.update(id, {done: !task.done})
+  console.log(store)
 
-    this.setState({tasks: _.update(index, response, tasks)})
-  }
-
-  removeAll = () => {
-    this.setState({tasks: []})
-  }
-
-  render() {
-    const { title } = this.props
-    const { tasks, draft } = this.state
-
-    return (
-      <div>
-        <Header>{title}</Header>
-        {tasks.map(task =>
-          <ToDoItem
-            id={task.id}
-            key={task.id}
-            text={task.content}
-            done={task.done}
-            destroy={this.destroyToDo}
-            toggleDone={this.toggleDone}
-          />
-        )}
-        <NewTodoForm
-          onSubmit={this.addToDo}
-          onChange={this.updateDraft}
-          draft={draft} />
-      </div>
-    )
-  }
+  return (
+    <div>
+      <Header>My stuff</Header>
+      {store.todoIds.map(id =>
+        <ToDoItem
+          id={id}
+          key={id}
+          text={store.todos[id].content}
+          done={store.todos[id].done}
+          destroy={destroyToDo}
+          toggleDone={toggleDone}
+        />
+      )}
+      <NewTodoForm
+        onSubmit={addToDo}
+        onChange={(e) => setDraft(e.target.value)}
+        draft={draft} />
+    </div>
+  )
 }
 
 export default ToDoList
