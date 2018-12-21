@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { Component, lazy, Suspense } from 'react'
 import {
   BrowserRouter as Router,
   Route,
@@ -16,6 +16,8 @@ import {
   CurrentUserConsumer
 } from './context/CurrentUser.context'
 import './App.css'
+
+const Stats = lazy(() => import('./containers/Stats'));
 
 
 const Container = styled.div`
@@ -54,17 +56,20 @@ class App extends Component {
   render() {
     return (
       <Router>
-        <CurrentUserProvider>
-          <Container>
-            <Navbar/>
-            <Switch>
-              <Route exact path='/' component={ToDoList}/>
-              <PrivateRoute exact path={'/todo_items/:itemId'} component={ToDoEditForm}/>
-              <Route exact path='/login' component={Login} />
-              <Route component={NotFound} />
-            </Switch>
-          </Container>
-        </CurrentUserProvider>
+        <Suspense fallback={<div>Loading...</div>}>
+          <CurrentUserProvider>
+            <Container>
+              <Navbar/>
+              <Switch>
+                <Route exact path='/' component={ToDoList}/>
+                <PrivateRoute exact path={'/todo_items/:itemId'} component={ToDoEditForm}/>
+                <Route exact path='/login' component={Login} />
+                <Route exact path='/stats' component={Stats} />
+                <Route component={NotFound} />
+              </Switch>
+            </Container>
+          </CurrentUserProvider>
+        </Suspense>
       </Router>
     );
   }

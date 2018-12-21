@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import ToDoItem from '../../components/ToDoItem'
 import NewTodoForm from '../../components/NewTodoForm'
 import styled from 'styled-components'
+import { Link } from 'react-router-dom'
 import * as toDoItemApi from '../../helpers/toDoItemApi'
 import * as _ from 'ramda'
 
@@ -71,6 +72,7 @@ class ToDoList extends Component {
     return (
       <div>
         <Header>{title}</Header>
+        <Link to='/stats'>Stats</Link>
         {tasks.map(task =>
           <ToDoItem
             id={task.id}
